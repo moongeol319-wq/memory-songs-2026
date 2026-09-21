@@ -1,0 +1,33 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>나의 과거와 현재를 이어주는 추억의 명곡들</title>
+<style>
+body{margin:0;background:radial-gradient(circle at top,#63302b,#1a1010 55%,#090707);color:#f5ead7;font-family:Georgia,"Noto Serif KR",serif}
+main{min-height:100vh;display:grid;place-items:center;padding:24px}.card{max-width:850px;width:100%;text-align:center;border:1px solid #d7ad63;padding:60px 24px;background:#110c0ccc;box-shadow:0 30px 80px #0008}
+small{letter-spacing:.28em;color:#d7ad63}h1{font-size:clamp(38px,7vw,70px);font-weight:500;margin:20px 0}.info{font-size:18px;line-height:2}.seat{font-size:20px;color:#e5bd72;margin:20px}
+button{padding:14px 24px;border-radius:30px;border:0;margin:7px;background:#ddb568;font-weight:700;cursor:pointer}.secondary{background:transparent;color:#f5ead7;border:1px solid #d7ad63}
+dialog{width:min(520px,90%);border-radius:14px;padding:25px;background:#fbf4e8;color:#261713}dialog::backdrop{background:#000b}
+label{display:block;text-align:left;margin:12px 0 5px;font-weight:bold}input,select{width:100%;box-sizing:border-box;padding:11px;font-size:16px}.msg{margin-top:12px;font-weight:bold}.x{float:right}
+</style></head><body><main><section class="card">
+<small>SPECIAL CONCERT · MEMORY SONGS</small>
+<h1>나의 과거와 현재를 이어주는<br>추억의 명곡들</h1>
+<p>음악을 듣는 순간, 그 시절의 우리가 다시 만납니다.</p>
+<div class="info">2026. 12. 30. WED · 7:30 PM<br>전남광주통합특별시 예술의 전당 소극장</div>
+<div class="seat">잔여 좌석 <b id="remaining">380</b> / 380</div>
+<button onclick="booking.showModal()">예매하기</button><button class="secondary" onclick="lookup.showModal()">예매 확인 · 취소</button>
+</section></main>
+<dialog id="booking"><button class="x" onclick="booking.close()">닫기</button><h2>공연 예매</h2><form id="bf">
+<label>이름</label><input name="name" required><label>휴대전화번호</label><input name="phone" required placeholder="010-1234-5678">
+<label>예매 매수</label><select name="qty"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select>
+<label><input style="width:auto" type="checkbox" required> 개인정보 수집 및 예매 처리에 동의합니다.</label>
+<button>예매 완료</button><div id="bm" class="msg"></div></form></dialog>
+<dialog id="lookup"><button class="x" onclick="lookup.close()">닫기</button><h2>예매 확인 · 취소</h2><form id="lf">
+<label>이름</label><input name="name" required><label>휴대전화번호</label><input name="phone" required>
+<button>예매 조회</button><div id="lm" class="msg"></div><div id="ca"></div></form></dialog>
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbzfLf6oMzYRgV8zYfiAKmQo8sf0Y1FT7vr8U1U8mVz8Cq5fJWxfZBSKpzYmVN099EHi/exec";
+async function api(action,payload={}){const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...payload})});return await r.json()}
+async function seats(){try{let d=await api("status");remaining.textContent=d.remaining}catch(e){}}
+bf.onsubmit=async e=>{e.preventDefault();let f=new FormData(bf);bm.textContent="처리 중...";try{let d=await api("book",{name:f.get("name"),phone:f.get("phone"),qty:+f.get("qty")});bm.textContent=d.ok?"예매 완료! 예매번호: "+d.bookingId:d.message;if(d.ok){bf.reset();seats()}}catch(x){bm.textContent=x.message}}
+lf.onsubmit=async e=>{e.preventDefault();let f=new FormData(lf);ca.innerHTML="";lm.textContent="조회 중...";try{let d=await api("lookup",{name:f.get("name"),phone:f.get("phone")});if(!d.ok){lm.textContent=d.message;return}lm.textContent=`예매번호 ${d.bookingId} · ${d.qty}매 · ${d.status}`;if(d.status==="CONFIRMED"){let b=document.createElement("button");b.type="button";b.textContent="예매 취소";b.onclick=async()=>{if(!confirm("예매를 취소하시겠습니까?"))return;let x=await api("cancel",{bookingId:d.bookingId,name:f.get("name"),phone:f.get("phone")});lm.textContent=x.message;ca.innerHTML="";seats()};ca.appendChild(b)}}catch(x){lm.textContent=x.message}}
+seats();
+</script></body></html>
