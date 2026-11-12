@@ -47,7 +47,7 @@ input,select{width:100%;padding:12px;border:1px solid #c7b18f;border-radius:8px;
 function normalizePhone(p){
   return String(p || "").replace(/\D/g,"");
 }
-const API_URL="https://script.google.com/macros/library/d/1pm32rLdmeO92E1g4gY1JS_ShIKlRyjuU0vVuaLHYIuV2GcSnK3ZuMhC2/4";
+const API_URL="https://script.google.com/macros/library/d/1pm32rLdmeO92E1g4gY1JS_ShIKlRyjuU0vVuaLHYIuV2GcSnK3ZuMhC2/1";
 async function api(action,payload={}){const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...payload})});return await r.json()}
 async function seats(){try{let d=await api("status");remaining.textContent=d.remaining}catch(e){}}
 bf.onsubmit=async e=>{e.preventDefault();let f=new FormData(bf);bm.textContent="처리 중...";try{let d=await api("book",{name:f.get("name"),phone:normalizePhone(f.get("phone")),qty:+f.get("qty")});bm.textContent=d.ok?"예매 완료! 예매번호: "+d.bookingId:d.message;if(d.ok){bf.reset();seats()}}catch(x){bm.textContent=x.message}};
